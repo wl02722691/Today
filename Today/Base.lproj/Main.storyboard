@@ -17,11 +17,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="detailButton" indentationWidth="10" reuseIdentifier="ToDoItemCell" id="7R0-Fz-R2x">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="ToDoItemCell" id="7R0-Fz-R2x">
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7R0-Fz-R2x" id="1Wj-fb-7Tw">
-                                    <rect key="frame" x="0.0" y="0.0" width="328" height="43.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>
@@ -31,7 +31,14 @@
                             <outlet property="delegate" destination="tja-T9-ugB" id="IUl-lr-axm"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Todoey" id="gFU-Ss-eP3"/>
+                    <navigationItem key="navigationItem" title="Todoey" id="gFU-Ss-eP3">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="3dm-Tz-h8t">
+                            <color key="tintColor" red="0.99651390314102173" green="0.99302679300308228" blue="0.99302679300308228" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <connections>
+                                <action selector="addButtonPressend:" destination="tja-T9-ugB" id="VaS-px-ikZ"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="P2o-3E-SEt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

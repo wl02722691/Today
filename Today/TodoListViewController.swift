@@ -12,17 +12,16 @@ class TodoListViewController: UITableViewController {
 
     var itemArray = ["hello Alice","Vincent is a dog","Today is  12/27","焼肉食べたい！！！！"]
     
+    let defaults = UserDefaults.standard //defaults1
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if var item = defaults.array(forKey: "TodoListArray") as? [String]{
+           itemArray = item
+        }
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
@@ -50,27 +49,30 @@ class TodoListViewController: UITableViewController {
     
     @IBAction func addButtonPressend(_ sender: UIBarButtonItem) {
         
-        var textField = UITextField()
+        var textField = UITextField()//先開一個textField在最上面才能在action時讀取到addTextField.text
         
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
-        let action = UIAlertAction.init(title: "加入待辦事項", style: .default) { (action) in
+        
+        let action = UIAlertAction.init(title: "Add New Item", style: .default) { (action) in
             //what wll happen once the user clicks the Add Item button on our UIAlert
+           
             self.itemArray.append(textField.text!)
+            
+            self.defaults.setValue(self.itemArray, forKey: "TodoListArray") //defaults2
+            
             self.tableView.reloadData()
         }
         
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Creat New Item"
             textField = alertTextField
-            
+            //讓最上面的textField=alertTextField才能讓action讀取到self.itemArray.append(textField.text!)存在array
         }
         
-        alert.addAction(action)
+        alert.addAction(action)//記得addAction跟present
         present(alert, animated: true, completion: nil)
         
     }
-    
-    
 }
 
 

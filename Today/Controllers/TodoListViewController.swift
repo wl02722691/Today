@@ -10,14 +10,27 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    var itemArray = ["hello Alice","Vincent is a dog","Today is  12/27","焼肉食べたい！！！！"]
+    var itemArray = [Item]()
     
     let defaults = UserDefaults.standard //defaults1
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let newItem = Item()
+        newItem.title = "Find Alice"
+        itemArray.append(newItem)
         
-        if var item = defaults.array(forKey: "TodoListArray") as? [String]{
+        let newItem2 = Item()
+        newItem2.title = "Feed Vincent"
+        itemArray.append(newItem2)
+        
+        let newItem3 = Item()
+        newItem3.title = "punch Vincent"
+        itemArray.append(newItem3)
+        
+        
+
+        if var item = defaults.array(forKey: "TodoListArray") as? [Item]{
            itemArray = item
         }
     }
@@ -28,26 +41,46 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row]
+        
+       let item = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        
+        //Ternary operator ==>
+        //value = condition ? valueIftrue : valueFalse
+        
+        cell.accessoryType = item.done ? .checkmark : .none
+        
+//      方法1 cell.accessoryType = item.done == true ? .checkmark : .none
+//      方法2  if item.done == true{
+//            cell.accessoryType = .checkmark
+//        }else{
+//            cell.accessoryType = .none
+//        }
+//
         return cell
-
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+//        上面那行代替下面這五行程式碼 酷酷酷～
+//        if itemArray[indexPath.row].done == true {
+//            itemArray[indexPath.row].done = false
+//        }else{
+//            itemArray[indexPath.row].done = true
+//        }
+        
         print(itemArray[indexPath.row])//print出itemArray的字
+        tableView.reloadData()//記得要reload!!!!
         
         tableView.deselectRow(at: indexPath, animated: true) //讓原先被選到的那列變深色的效果消失
-       
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark{ //讓被選到的這列有checkmark or Not
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }else{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
     }
     
     //MARK - Add New Item
     
     @IBAction func addButtonPressend(_ sender: UIBarButtonItem) {
+        
         
         var textField = UITextField()//先開一個textField在最上面才能在action時讀取到addTextField.text
         
@@ -55,8 +88,10 @@ class TodoListViewController: UITableViewController {
         
         let action = UIAlertAction.init(title: "Add New Item", style: .default) { (action) in
             //what wll happen once the user clicks the Add Item button on our UIAlert
-           
-            self.itemArray.append(textField.text!)
+          
+            let newItem = Item()
+            newItem.title = textField.text!
+            self.itemArray.append(newItem)
             
             self.defaults.setValue(self.itemArray, forKey: "TodoListArray") //defaults2
             

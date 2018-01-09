@@ -136,10 +136,6 @@ class TodoListViewController: UITableViewController{
             request.predicate = categorypredicate
         }
         
-//        用optional binding寫
-//        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categorypredicate,predicate!])
-//        request.predicate = compoundPredicate
-        
         do{
            itemArray = try context.fetch(request)
         }catch{
@@ -167,7 +163,7 @@ extension TodoListViewController:UISearchBarDelegate{
             let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
             
             request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-            
+
             loadItem(with: request, predicate: predicate)
             }
         }

@@ -8,5 +8,6 @@ target 'Today' do
   # Pods for Today
 
 pod 'RealmSwift'
+pod 'SwipeCellKit', :git => 'https://github.com/SwipeCellKit/SwipeCellKit.git', :branch => 'develop'
 
 end

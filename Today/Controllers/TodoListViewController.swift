@@ -6,212 +6,116 @@
 //  Copyright © 2017年 AliceChang. All rights reserved.
 //
 
-import CoreData
 import UIKit
+import RealmSwift
 
-class TodoListViewController: UITableViewController{
-    var itemArray = [Item]()
+class TodoListViewController: UITableViewController {
+    
+    @IBOutlet weak var searchBar: UISearchBar!
+    
+    let realm = try! Realm()
+    var todoItems : Results<Item>?
     
     var selectedCategory : Category? {
-        didSet{
-            loadItem()
+        didSet {
+            loadItems()
         }
     }
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-   
-
-
-    
     override func viewDidLoad() {
-    super.viewDidLoad()
-    //  print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-    
-
-//
-//        if var item = defaults.array(forKey: "TodoListArray") as? [Item]{
-//           itemArray = item
-//        }
+        super.viewDidLoad()
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        
     }
-
-
+    
+    //MARK - Table View delegates
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemArray.count
+        
+        return todoItems?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-       let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-       let item = itemArray[indexPath.row]
-        cell.textLabel?.text = item.title
         
-        //Ternary operator ==>
-        //value = condition ? valueIftrue : valueFalse
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        cell.accessoryType = item.done ? .checkmark : .none
+        if let item = todoItems?[indexPath.row] {
+            cell.textLabel?.text = item.title
+            cell.accessoryType = item.done ? .checkmark : .none
+        } else {
+            cell.textLabel?.text = "No Items added"
+        }
         
-//      方法1 cell.accessoryType = item.done == true ? .checkmark : .none
-//      方法2  if item.done == true{
-//            cell.accessoryType = .checkmark
-//        }else{
-//            cell.accessoryType = .none
-//        }
-//
         return cell
     }
-
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-       // context.delete(itemArray[indexPath.row])
-       // itemArray.remove(at: indexPath.row)
-        
-        
-        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        
-        saveItem()
-        
-//        上面那行代替下面這五行程式碼 酷酷酷～
-//        if itemArray[indexPath.row].done == true {
-//            itemArray[indexPath.row].done = false
-//        }else{
-//            itemArray[indexPath.row].done = true
-//        }
-        
-       // print(itemArray[indexPath.row])//print出itemArray的字
-      
-        
-        tableView.deselectRow(at: indexPath, animated: true) //讓原先被選到的那列變深色的效果消失
+        if let item = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    item.done = !item.done
+                }
+            } catch {
+                print("Erro saving done status, \(error)")
+            }
+        }
+        tableView.reloadData()
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    //MARK - Add New Item
-    
-    @IBAction func addButtonPressend(_ sender: UIBarButtonItem) {
+    //MARK - Add new items
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
-        
-        var textField = UITextField()//先開一個textField在最上面才能在action時讀取到addTextField.text
-        
+        var textField = UITextField()
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         
-        let action = UIAlertAction.init(title: "Add New Item", style: .default) { (action) in
-            //what wll happen once the user clicks the Add Item button on our UIAlert
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             
-            //要用Application不能直接用AppDelegate.persistentContainer.viewContext因為AppDelegate是class要跨檔案使用要delegate
-            let newItem = Item(context: self.context)
-            newItem.done = false
-            newItem.title = textField.text!
-            newItem.parentCategory = self.selectedCategory
-            self.itemArray.append(newItem)
-            self.saveItem()
-
+            if let currentCategory = self.selectedCategory{
+                do {
+                    try self.realm.write {
+                        let newItem = Item()
+                        newItem.title = textField.text!
+                        newItem.dateCreated = Date()
+                        currentCategory.items.append(newItem)
+                    }
+                } catch {
+                    print("Error saving new items, \(error)")
+                }
+            }
+            self.tableView.reloadData()
         }
         
         alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Creat New Item"
+            alertTextField.placeholder = "Create new item"
             textField = alertTextField
-            //讓最上面的textField=alertTextField才能讓action讀取到self.itemArray.append(textField.text!)存在array
         }
-        
-        alert.addAction(action)//記得addAction跟present
+        alert.addAction(action)
         present(alert, animated: true, completion: nil)
-        
-    }
-
-    func saveItem(){
-        
-        do{
-            try context.save()
-        }catch{
-            print("error saving context\(error.localizedDescription)")
-        }
-        
-        self.tableView.reloadData()
     }
     
-    func loadItem(with request:NSFetchRequest<Item> = Item.fetchRequest(), predicate:NSPredicate? = nil){
-        
-        let categorypredicate = NSPredicate(format: "parentCategory.name MATCHES %@",selectedCategory!.name!)
-
-        if let addtionPredicate = predicate{
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates:[categorypredicate,addtionPredicate])
-        }else{
-            request.predicate = categorypredicate
-        }
-        
-        do{
-           itemArray = try context.fetch(request)
-        }catch{
-            print("Error fetching data from context\(error.localizedDescription)")
-        }
+    //MARK - Data manipulation
+    
+    //Load Items
+    func loadItems()  {
+        todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
     }
-}
+} //class end
 
-//MARK: - Search Bar methods
-
-extension TodoListViewController:UISearchBarDelegate{
-
+//MARK: - Search bar methods
+extension TodoListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+        tableView.reloadData()
+    }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {
-            loadItem()
-            DispatchQueue.main.async {//當收起searchBar.text?.count == 0的時候會把鍵盤收起來
+            loadItems()
+            DispatchQueue.main.async {
                 searchBar.resignFirstResponder()
-            }
-            
-        }else{//當textDidChange時會立刻搜尋，不用按按鈕
-            let request : NSFetchRequest<Item> = Item.fetchRequest()
-            
-            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-            
-            request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-
-            loadItem(with: request, predicate: predicate)
             }
         }
     }
-    
-    
-//
-//    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        if searchBar.text?.count == 0{
-//            loadItem()
-//            tableView.reloadData()
-//            DispatchQueue.main.async {
-//                searchBar.resignFirstResponder()
-//            }
-//        }else{
-//            searchBarSearchButtonClicked(searchBar)
-//        }
-//    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} //extension end

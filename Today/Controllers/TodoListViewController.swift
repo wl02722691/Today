@@ -36,7 +36,7 @@ class TodoListViewController: SwipeTableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
@@ -45,6 +45,7 @@ class TodoListViewController: SwipeTableViewController {
             cell.textLabel?.text = "No Items added"
         }
         
+
         return cell
     }
     
@@ -96,6 +97,7 @@ class TodoListViewController: SwipeTableViewController {
     
     //MARK - Data manipulation
     
+    
     //Load Items
     func loadItems()  {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
@@ -104,6 +106,17 @@ class TodoListViewController: SwipeTableViewController {
  //class end
 
 //MARK: - Delete data from Swipe
+    override func updateModel(at indexpath: IndexPath) {
+        if let itemForDelete = self.todoItems?[indexpath.row]{
+            do{
+                try self.realm.write {
+                    self.realm.delete(itemForDelete)
+                }
+            }catch{
+                print("error delteing items, \(error)")
+                }
+            }
+        }
     }
     
 //MARK: - Search bar methods

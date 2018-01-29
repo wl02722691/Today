@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
     
     @IBOutlet weak var searchBar: UISearchBar!
     
@@ -101,8 +101,11 @@ class TodoListViewController: UITableViewController {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
         tableView.reloadData()
     }
-} //class end
+ //class end
 
+//MARK: - Delete data from Swipe
+    }
+    
 //MARK: - Search bar methods
 extension TodoListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -118,4 +121,4 @@ extension TodoListViewController: UISearchBarDelegate {
             }
         }
     }
-} //extension end
+}

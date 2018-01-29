@@ -31,6 +31,7 @@ class TodoListViewController: SwipeTableViewController {
         tableView.separatorStyle = .none
     }
     
+    //讓TodoListViewController的navigationBar搭配parentCategory中的color
     override func viewWillAppear(_ animated: Bool) {
         
         title = selectedCategory?.name
@@ -52,7 +53,7 @@ class TodoListViewController: SwipeTableViewController {
         
         
     }
-    
+    //從TodoListViewController出去的navigationBar的顏色改回藍色
     override func viewWillDisappear(_ animated: Bool) {
         guard let originalColor = UIColor(hexString:"1D9BF6") else {fatalError()}
         navigationController?.navigationBar.barTintColor = originalColor
@@ -75,26 +76,19 @@ class TodoListViewController: SwipeTableViewController {
         if let item = todoItems?[indexPath.row] {
             
             cell.textLabel?.text = item.title
-            
-            
             if let color = UIColor(hexString:selectedCategory!.color)?.darken(byPercentage: CGFloat(indexPath.row)/CGFloat(todoItems!.count)){
-                
                 cell.backgroundColor = color
                 cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
                 
             }
             
- 
             
             cell.textLabel?.text = item.title
             cell.accessoryType = item.done ? .checkmark : .none
            
-            
         } else {
             cell.textLabel?.text = "No Items added"
         }
-        
-
         return cell
     }
     

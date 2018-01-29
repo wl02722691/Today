@@ -36,17 +36,7 @@ class SwipeTableViewController: UITableViewController,SwipeTableViewCellDelegate
             print("delete")
             
             self.updateModel(at: indexPath)
-//            // handle action by updating model with deletion
-//
-//            if let categoryForDelete = self.categories?[indexPath.row]{
-//                do{
-//                    try self.realm.write {
-//                        self.realm.delete(categoryForDelete)
-//                    }
-//                }catch{
-//                    print("error delteing category, \(error)")
-//                }
-//            }
+
         }
         
         deleteAction.image = UIImage(named: "delete")
